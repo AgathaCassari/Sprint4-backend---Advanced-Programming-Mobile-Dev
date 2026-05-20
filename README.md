@@ -67,7 +67,7 @@ DELETE /alertas/{id}
 ### 1. Clonar o repositório
 
 ```bash
-git clone LINK_DO_REPOSITORIO
+git clone (https://github.com/AgathaCassari/Sprint1---Advanced-Programming-Mobile-Dev)
 ```
 
 ### 2. Abrir no VS Code
