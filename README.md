@@ -1,5 +1,7 @@
 # Sistema de Consultas — API Backend (Sprint 4)
 
+🎥 Vídeo de demonstração (YouTube, Não listado): <https://www.youtube.com/watch?v=CWpSwfw5hJQ>
+
 ## Descrição
 
 API REST em Spring Boot para o Sistema de Consultas. As entidades do grupo são **Consulta**, **Médico**, **Paciente** e **Especialidade**. O backend segue o padrão de camadas (model, repository, service, controller) e é consumido de verdade pelo app Expo/React Native, que está em um repositório separado: **https://github.com/AgathaCassari/sistema-consultas-mobile**.
@@ -81,3 +83,6 @@ Campos da `Consulta`: `id` (gerado pelo backend), `medico` (objeto com `id`), `p
 Banco H2 em modo arquivo (`jdbc:h2:file:./data/consultas`), configurado em `application.properties`. Os dados sobrevivem a reinicializações da aplicação (não é um banco em memória). Na primeira execução, com o banco vazio, o `DataLoader` cadastra dados iniciais; nas próximas ele detecta que já existem e pula a carga. Há índices únicos para CRM, CPF, e-mail e nome da especialidade.
 
 ## Vídeo
+
+🎥 <https://www.youtube.com/watch?v=CWpSwfw5hJQ> (YouTube, Não listado)
+O vídeo mostra: README e repositórios → backend no ar com GET em JSON → app listando a API → cadastro no app e o dado no backend → backend parado → app recarregado sem dados (erro/loading, sem mock).
