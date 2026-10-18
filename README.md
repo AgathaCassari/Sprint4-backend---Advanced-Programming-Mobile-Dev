@@ -1,24 +1,14 @@
-# PrevIA API — Backend · Sprint 4 · Entrega Final
+# Sistema de Consultas — API Backend (Sprint 4)
 
-API REST em Spring Boot do sistema **PrevIA**, consumida pelo app Expo / React Native.
+## Descrição
 
-## 1. Projeto e problema
+API REST em Spring Boot para o Sistema de Consultas. As entidades do grupo são **Consulta**, **Médico**, **Paciente** e **Especialidade**. O backend segue o padrão de camadas (model, repository, service, controller) e é consumido de verdade pelo app Expo/React Native, que está em um repositório separado: **https://github.com/AgathaCassari/sistema-consultas-mobile**.
 
-Em ambientes industriais, a segurança exige monitoramento contínuo e resposta rápida para evitar acidentes e proteger os operadores. Muitos riscos, como a ausência de EPI (capacete, colete, luvas), posturas inadequadas ou aproximação de áreas perigosas, só são percebidos quando o incidente já ocorreu.
+**Problema:** pacientes têm dificuldade para agendar consultas e acompanhar seus atendimentos, e os médicos precisam controlar as consultas marcadas na sua agenda. O sistema centraliza esse processo: o paciente escolhe a especialidade e o médico e agenda a consulta; o médico consulta e gerencia (confirma ou cancela) as consultas agendadas, com todos os dados persistidos na API.
 
-O **PrevIA** registra **alertas** de segurança identificados no ambiente industrial. Esta API é responsável por **armazenar, consultar e gerenciar** esses alertas, permitindo que o app mobile os exiba e cadastre novos.
+**Entidade principal:** `Consulta` (`id`, `medico`, `paciente`, `dataHora`, `status`, `valor`, `observacoes`), que se relaciona com `Medico`, `Paciente` e `Especialidade`.
 
-**Entidade principal:** `Alerta`
-
-| Campo | Descrição |
-|---|---|
-| `id` | Gerado pelo backend |
-| `tipo` | Tipo do alerta (ex.: ausência de EPI, comportamento de risco) |
-| `localizacao` | Onde ocorreu |
-| `nivelRisco` | Nível de risco |
-| `descricao` | Descrição do ocorrido |
-
-## 2. Integrantes
+## Integrantes
 
 | Nome | RM |
 |---|---|
@@ -27,102 +17,67 @@ O **PrevIA** registra **alertas** de segurança identificados no ambiente indust
 | Leonardo Fernandes Veleiro | 557773 |
 | Sara Barbosa da Silva | 559042 |
 
-## 3. Repositórios
+## Repositórios
 
-| Parte | Link |
-|---|---|
-| Backend (Spring Boot): este repositório | https://github.com/AgathaCassari/Sprint1-backend---Advanced-Programming-Mobile-Dev |
-| Frontend (Expo / React Native) | https://github.com/AgathaCassari/Sprint2-frontend---Advanced-Programming-Mobile-Dev |
+- Backend (este repositório): https://github.com/AgathaCassari/backend-consultas
+- Frontend: https://github.com/AgathaCassari/sistema-consultas-mobile
 
-## 4. Arquitetura (camadas)
+## Pré-requisitos
 
-O backend segue o padrão de camadas:
+- Java 17
+- Maven (ou o wrapper `./mvnw`, que já vem no repositório)
+- Porta 8080 livre
 
-```
-Controller  →  Service  →  Repository  →  Banco H2 (arquivo)
-(HTTP/JSON)    (regras)     (JPA)          ./data/previa
-```
+## Como subir o backend
 
-- **model**: entidade `Alerta`
-- **repository**: acesso ao banco (Spring Data JPA)
-- **service**: regras de negócio
-- **controller**: `AlertaController`, com os endpoints REST e `@CrossOrigin(origins = "*")`
+1. Clone este repositório.
+2. Rode a aplicação pela classe principal `BackendConsultasApplication.java` (pelo VS Code/IDE, ou `./mvnw spring-boot:run`; no Windows, `mvnw.cmd spring-boot:run`).
+3. A API sobe em `http://localhost:8080`.
+4. Console H2 (opcional, para inspecionar os dados):
+`http://localhost:8080/h2-console` — JDBC URL: `jdbc:h2:file:./data/consultas` — usuário e senha conforme `application.properties`.
+5. Confirme que os endpoints respondem em JSON antes de abrir o app — por exemplo, acessando `http://localhost:8080/consultas` no navegador ou testando no Postman/Insomnia.
 
-## 5. Pré-requisitos
+O CORS está configurado (pacote `config`), liberando o acesso do app (que roda em outra origem) para a API.
 
-- **Java 17**
-- **Maven 3.9+** (o repositório também traz o wrapper `mvnw`, então o Maven instalado é opcional)
-- Porta **8080** livre
+## Endpoints
 
-Para conferir: `java -version` (deve mostrar 17) e `mvn -version`.
+| Recurso | Ação | Método | Rota |
+| --- | --- | --- | --- |
+| Health | Verificar se a API está no ar | GET | `/health` |
+| Especialidades | Listar | GET | `/especialidades` |
+| | Buscar por ID | GET | `/especialidades/{id}` |
+| | Criar | POST | `/especialidades` |
+| Médicos | Listar | GET | `/medicos` |
+| | Buscar por ID | GET | `/medicos/{id}` |
+| | Buscar por CRM | GET | `/medicos/crm/{crm}` |
+| | Listar por especialidade | GET | `/medicos/especialidade/{especialidadeId}` |
+| | Cadastrar | POST | `/medicos` |
+| | Atualizar | PUT | `/medicos/{id}` |
+| Pacientes | Listar | GET | `/pacientes` |
+| | Buscar por ID | GET | `/pacientes/{id}` |
+| | Buscar por CPF | GET | `/pacientes/cpf/{cpf}` |
+| | Cadastrar | POST | `/pacientes` |
+| Consultas | Listar | GET | `/consultas` |
+| | Buscar por ID | GET | `/consultas/{id}` |
+| | Agendar | POST | `/consultas` |
+| | Atualizar (confirmar/cancelar) | PUT | `/consultas/{id}` |
+| | Listar por médico | GET | `/consultas/medico/{medicoId}` |
+| | Listar por paciente | GET | `/consultas/paciente/{pacienteId}` |
 
-## 6. Como subir o backend (porta 8080)
+Campos da `Consulta`: `id` (gerado pelo backend), `medico` (objeto com `id`), `paciente` (objeto com `id`), `dataHora`, `status`, `valor`, `observacoes`.
 
-```bash
-git clone https://github.com/AgathaCassari/Sprint1-backend---Advanced-Programming-Mobile-Dev.git
-cd Sprint1-backend---Advanced-Programming-Mobile-Dev
-./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run   (ou: mvn spring-boot:run)
-```
+## Como testar a integração
 
-Alternativa: rodar a classe principal `PreviaApiApplication.java` pela IDE (VS Code, IntelliJ).
+1. Suba o backend e confirme `GET http://localhost:8080/consultas` retornando `[]` ou as consultas já salvas no H2.
+2. Suba o app do repositório do frontend e abra as telas de escolha de especialidade e médico — elas devem carregar os mesmos dados da API.
+3. Agende uma consulta pelo app e confira que ela aparece:
+  - na lista do app;
+  - no `GET /consultas` direto no navegador/Postman;
+  - no arquivo do banco `data/consultas.mv.db` (dado persistido de verdade, não é mock).
+4. Para simular falha, pare o backend (`Ctrl + C`) e reabra a tela no app — ela deve mostrar o estado de erro.
 
-Quando subir, a API fica em **`http://localhost:8080`**.
+## Persistência
 
-Confirme que está no ar abrindo no navegador:
+Banco H2 em modo arquivo (`jdbc:h2:file:./data/consultas`), configurado em `application.properties`. Os dados sobrevivem a reinicializações da aplicação (não é um banco em memória). Na primeira execução, com o banco vazio, o `DataLoader` cadastra dados iniciais; nas próximas ele detecta que já existem e pula a carga. Há índices únicos para CRM, CPF, e-mail e nome da especialidade.
 
-```
-http://localhost:8080/alertas
-```
-
-Deve aparecer um JSON (`[]` ou a lista de alertas).
-
-## 7. Banco de dados (H2 em arquivo)
-
-- URL JDBC: `jdbc:h2:file:./data/previa`
-- Usuário: `sa` · Senha: em branco
-- Console H2 (opcional): `http://localhost:8080/h2-console`
-- Os dados **persistem** entre reinicializações (arquivo `data/previa.mv.db`). Não é banco em memória.
-- Configuração em `application.properties`.
-
-## 8. CORS
-
-O `AlertaController` usa `@CrossOrigin(origins = "*")`, o que libera o acesso do app (que roda em outra origem) à API.
-
-## 9. Endpoints
-
-| Ação | Método | Rota |
-|---|---|---|
-| Listar alertas | GET | `/alertas` |
-| Buscar por ID | GET | `/alertas/{id}` |
-| Criar alerta | POST | `/alertas` |
-| Atualizar (opcional) | PUT | `/alertas/{id}` |
-| Remover (opcional) | DELETE | `/alertas/{id}` |
-
-Exemplo de corpo do `POST /alertas`:
-
-```json
-{
-  "tipo": "Ausência de EPI",
-  "localizacao": "Setor A",
-  "nivelRisco": "Alto",
-  "descricao": "Funcionário sem capacete na área de carga"
-}
-```
-
-Teste rápido pelo terminal:
-
-```bash
-curl http://localhost:8080/alertas
-curl -X POST http://localhost:8080/alertas -H "Content-Type: application/json" \
-  -d '{"tipo":"Ausência de EPI","localizacao":"Setor A","nivelRisco":"Alto","descricao":"Sem capacete"}'
-```
-
-## 10. Como testar a integração com o app
-
-1. Suba o backend e confirme `GET http://localhost:8080/alertas` retornando JSON.
-2. Suba o app (veja o README do frontend) e abra a tela de **lista**: ela deve mostrar os mesmos dados.
-3. Cadastre um alerta pelo app e confira que ele aparece:
-   - na lista do app;
-   - em `GET /alertas` no navegador ou Postman;
-   - no arquivo `data/previa.mv.db` (dado persistido, não é mock).
-4. Para simular falha, **pare o backend** (`Ctrl + C` no terminal) e recarregue a lista no app: ele deve mostrar o estado de erro, sem dados.
+## Vídeo
