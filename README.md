@@ -1,19 +1,19 @@
-# PrevIA — App (Frontend) · Sprint 4 · Entrega Final
+# PrevIA API — Backend · Sprint 4 · Entrega Final
 
-App Expo / React Native integrado à API Spring Boot do PrevIA.
+API REST em Spring Boot do sistema **PrevIA**, consumida pelo app Expo / React Native.
 
 ## 1. Projeto e problema
 
-Em ambientes industriais, a segurança exige monitoramento contínuo e resposta rápida para evitar acidentes e proteger os operadores. Muitos riscos, como a ausência de EPI (capacete, colete, luvas), posturas inadequadas, aproximação de áreas perigosas ou condições invisíveis a olho nu, só são percebidos quando o incidente já ocorreu.
+Em ambientes industriais, a segurança exige monitoramento contínuo e resposta rápida para evitar acidentes e proteger os operadores. Muitos riscos, como a ausência de EPI (capacete, colete, luvas), posturas inadequadas ou aproximação de áreas perigosas, só são percebidos quando o incidente já ocorreu.
 
-O **PrevIA** é um sistema de prevenção de acidentes inspirado nesse desafio: a visão computacional identifica situações de risco e o sistema registra **alertas** de segurança (ausência de EPI, comportamento de risco etc.). Este app mobile permite **listar, cadastrar e consultar** esses alertas, consumindo a API Spring Boot do grupo, para que a equipe acompanhe os riscos e aja de forma preventiva..
+O **PrevIA** registra **alertas** de segurança identificados no ambiente industrial. Esta API é responsável por **armazenar, consultar e gerenciar** esses alertas, permitindo que o app mobile os exiba e cadastre novos.
 
 **Entidade principal:** `Alerta`
 
 | Campo | Descrição |
 |---|---|
 | `id` | Gerado pelo backend |
-| `tipo` | Tipo do alerta (ex.: ausência de EPI) |
+| `tipo` | Tipo do alerta (ex.: ausência de EPI, comportamento de risco) |
 | `localizacao` | Onde ocorreu |
 | `nivelRisco` | Nível de risco |
 | `descricao` | Descrição do ocorrido |
@@ -31,69 +31,72 @@ O **PrevIA** é um sistema de prevenção de acidentes inspirado nesse desafio: 
 
 | Parte | Link |
 |---|---|
-| Backend (Spring Boot) | https://github.com/AgathaCassari/Sprint1-backend---Advanced-Programming-Mobile-Dev |
-| Frontend (Expo) — este repositório | https://github.com/AgathaCassari/Sprint2-frontend---Advanced-Programming-Mobile-Dev |
+| Backend (Spring Boot): este repositório | https://github.com/AgathaCassari/Sprint1-backend---Advanced-Programming-Mobile-Dev |
+| Frontend (Expo / React Native) | https://github.com/AgathaCassari/Sprint2-frontend---Advanced-Programming-Mobile-Dev |
 
-## 4. Pré-requisitos
+## 4. Arquitetura (camadas)
+
+O backend segue o padrão de camadas:
+
+```
+Controller  →  Service  →  Repository  →  Banco H2 (arquivo)
+(HTTP/JSON)    (regras)     (JPA)          ./data/previa
+```
+
+- **model**: entidade `Alerta`
+- **repository**: acesso ao banco (Spring Data JPA)
+- **service**: regras de negócio
+- **controller**: `AlertaController`, com os endpoints REST e `@CrossOrigin(origins = "*")`
+
+## 5. Pré-requisitos
 
 - **Java 17**
-- **Maven 3.9+** (o backend também traz o wrapper `./mvnw`)
-- **Node.js** (versão LTS) e **npm**
-- **Expo**: não precisa instalar globalmente, usa-se `npx expo start`
-- Para rodar o app: navegador, emulador (Android Studio / Xcode) **ou** celular com o app **Expo Go**
+- **Maven 3.9+** (o repositório também traz o wrapper `mvnw`, então o Maven instalado é opcional)
+- Porta **8080** livre
 
-## 5. Como subir o backend (porta 8080)
+Para conferir: `java -version` (deve mostrar 17) e `mvn -version`.
+
+## 6. Como subir o backend (porta 8080)
 
 ```bash
 git clone https://github.com/AgathaCassari/Sprint1-backend---Advanced-Programming-Mobile-Dev.git
 cd Sprint1-backend---Advanced-Programming-Mobile-Dev
-./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run  (ou: mvn spring-boot:run)
+./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run   (ou: mvn spring-boot:run)
 ```
 
-- A API sobe em `http://localhost:8080`.
-- Teste no navegador: `http://localhost:8080/alertas` deve devolver um JSON (`[]` ou a lista de alertas).
-- Banco **H2 em arquivo** (`jdbc:h2:file:./data/previa`): os dados persistem entre execuções.
-- Console H2 (opcional): `http://localhost:8080/h2-console` — JDBC URL `jdbc:h2:file:./data/previa`, usuário `sa`, senha em branco.
-- CORS liberado no `AlertaController` com `@CrossOrigin(origins = "*")`.
+Alternativa: rodar a classe principal `PreviaApiApplication.java` pela IDE (VS Code, IntelliJ).
 
-## 6. Como subir o frontend
+Quando subir, a API fica em **`http://localhost:8080`**.
 
-Em **outro terminal**, com o backend já rodando:
+Confirme que está no ar abrindo no navegador:
 
-```bash
-git clone https://github.com/AgathaCassari/Sprint2-frontend---Advanced-Programming-Mobile-Dev.git
-cd Sprint2-frontend---Advanced-Programming-Mobile-Dev
-npm install
-npx expo start
+```
+http://localhost:8080/alertas
 ```
 
-Depois, no terminal do Expo:
-- tecle `w` para abrir no navegador;
-- tecle `a` para abrir no emulador Android;
-- tecle `i` para abrir no simulador iOS (somente macOS);
-- ou leia o QR Code com o **Expo Go** no celular.
+Deve aparecer um JSON (`[]` ou a lista de alertas).
 
-## 7. BASE_URL
+## 7. Banco de dados (H2 em arquivo)
 
-Definida em `src/services/api.ts`, na função `resolverBaseUrl()`:
+- URL JDBC: `jdbc:h2:file:./data/previa`
+- Usuário: `sa` · Senha: em branco
+- Console H2 (opcional): `http://localhost:8080/h2-console`
+- Os dados **persistem** entre reinicializações (arquivo `data/previa.mv.db`). Não é banco em memória.
+- Configuração em `application.properties`.
 
-| Onde o app roda | BASE_URL |
-|---|---|
-| Navegador (web) / simulador iOS | `http://localhost:8080` |
-| Emulador Android | `http://10.0.2.2:8080` (o Android mapeia esse IP para o `localhost` do computador) |
-| Celular físico (Expo Go) | `http://<IP_DA_MAQUINA>:8080`, ex.: `http://192.168.0.10:8080` |
+## 8. CORS
 
-Para o celular físico: o celular e o computador precisam estar na **mesma rede Wi-Fi**. Edite a constante `IP_DA_MAQUINA` em `src/services/api.ts`. Para descobrir o IP, use `ipconfig` (Windows) ou `ifconfig` / `ip a` (Linux/macOS).
+O `AlertaController` usa `@CrossOrigin(origins = "*")`, o que libera o acesso do app (que roda em outra origem) à API.
 
-## 8. Endpoints usados pelo app
+## 9. Endpoints
 
 | Ação | Método | Rota |
 |---|---|---|
 | Listar alertas | GET | `/alertas` |
-| Buscar alerta por ID | GET | `/alertas/{id}` |
-| Cadastrar alerta | POST | `/alertas` |
-| Atualizar alerta (opcional) | PUT | `/alertas/{id}` |
-| Remover alerta (opcional) | DELETE | `/alertas/{id}` |
+| Buscar por ID | GET | `/alertas/{id}` |
+| Criar alerta | POST | `/alertas` |
+| Atualizar (opcional) | PUT | `/alertas/{id}` |
+| Remover (opcional) | DELETE | `/alertas/{id}` |
 
 Exemplo de corpo do `POST /alertas`:
 
@@ -106,33 +109,20 @@ Exemplo de corpo do `POST /alertas`:
 }
 ```
 
-## 9. Fluxo tela → serviço → endpoint
+Teste rápido pelo terminal:
 
-As telas **nunca** chamam `axios` nem montam URL. Tudo passa por `src/services/`:
+```bash
+curl http://localhost:8080/alertas
+curl -X POST http://localhost:8080/alertas -H "Content-Type: application/json" \
+  -d '{"tipo":"Ausência de EPI","localizacao":"Setor A","nivelRisco":"Alto","descricao":"Sem capacete"}'
+```
 
-- `src/services/api.ts`: instância única do axios (`baseURL`, `timeout` de 10 s, `Content-Type: application/json`).
-- `src/services/alertaService.ts`: funções que conhecem as rotas.
+## 10. Como testar a integração com o app
 
-| Tela | Função do serviço | Endpoint |
-|---|---|---|
-| Lista de alertas | `listar()` | `GET /alertas` |
-| Cadastro de alerta | `criar(novoAlerta)` | `POST /alertas` |
-| Detalhe do alerta | `buscarPorId(id)` + `listar()` (em paralelo, via `Promise.all`) | `GET /alertas/{id}` e `GET /alertas` |
-
-Fluxo: **Tela → `alertaService` → `api.ts` (axios) → API Spring Boot → H2 (arquivo)**.
-
-## 10. Como cadastrar no app e conferir na API
-
-1. Com backend e app rodando, abra a **Lista** e veja os alertas atuais.
-2. Vá para **Cadastro**, preencha `tipo`, `localização`, `nível de risco` e `descrição` e salve.
-3. Ao voltar, a lista recarrega e mostra o novo alerta.
-4. Confira na API: abra `http://localhost:8080/alertas` no navegador (ou `curl http://localhost:8080/alertas`). O alerta novo aparece no JSON com o `id` gerado pelo backend.
-5. (Opcional) Confira no console H2 em `http://localhost:8080/h2-console`.
-
-## 11. Como parar o backend e ver o app sem dados
-
-1. No terminal do backend, pressione `Ctrl + C`.
-2. No app, recarregue a lista (botão **"Tentar novamente"** ou recarregue o Expo com `r`).
-3. Resultado esperado: **nenhum dado é exibido**, só a mensagem de erro de conexão.
-
-Não existe mock no fluxo principal. Cada tela tem três estados (**carregando**, **erro** e **sucesso**), tratados com `try/catch/finally`. Quando o backend volta, basta tocar em "Tentar novamente".
+1. Suba o backend e confirme `GET http://localhost:8080/alertas` retornando JSON.
+2. Suba o app (veja o README do frontend) e abra a tela de **lista**: ela deve mostrar os mesmos dados.
+3. Cadastre um alerta pelo app e confira que ele aparece:
+   - na lista do app;
+   - em `GET /alertas` no navegador ou Postman;
+   - no arquivo `data/previa.mv.db` (dado persistido, não é mock).
+4. Para simular falha, **pare o backend** (`Ctrl + C` no terminal) e recarregue a lista no app: ele deve mostrar o estado de erro, sem dados.
