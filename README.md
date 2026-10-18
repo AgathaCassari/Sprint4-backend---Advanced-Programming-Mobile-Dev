@@ -4,7 +4,7 @@
 
 ## Descrição
 
-API REST em Spring Boot para o Sistema de Consultas. As entidades do grupo são **Consulta**, **Médico**, **Paciente** e **Especialidade**. O backend segue o padrão de camadas (model, repository, service, controller) e é consumido de verdade pelo app Expo/React Native, que está em um repositório separado: **https://github.com/AgathaCassari/sistema-consultas-mobile**.
+API REST em Spring Boot para o Sistema de Consultas. As entidades do grupo são **Consulta**, **Médico**, **Paciente** e **Especialidade**. O backend segue o padrão de camadas (model, repository, service, controller) e é consumido de verdade pelo app Expo/React Native, que está em um repositório separado: **https://github.com/AgathaCassari/Sprint4-frontend---Advanced-Programming-Mobile-Dev**.
 
 **Problema:** pacientes têm dificuldade para agendar consultas e acompanhar seus atendimentos, e os médicos precisam controlar as consultas marcadas na sua agenda. O sistema centraliza esse processo: o paciente escolhe a especialidade e o médico e agenda a consulta; o médico consulta e gerencia (confirma ou cancela) as consultas agendadas, com todos os dados persistidos na API.
 
@@ -21,8 +21,8 @@ API REST em Spring Boot para o Sistema de Consultas. As entidades do grupo são 
 
 ## Repositórios
 
-- Backend (este repositório): https://github.com/AgathaCassari/backend-consultas
-- Frontend: https://github.com/AgathaCassari/sistema-consultas-mobile
+- Backend (este repositório): https://github.com/AgathaCassari/Sprint4-backend---Advanced-Programming-Mobile-Dev
+- Frontend: https://github.com/AgathaCassari/Sprint4-frontend---Advanced-Programming-Mobile-Dev
 
 ## Pré-requisitos
 
